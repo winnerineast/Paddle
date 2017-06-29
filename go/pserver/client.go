@@ -1,12 +1,13 @@
 package pserver
 
 import (
+	"errors"
 	"hash/fnv"
-	"log"
 	"sort"
 	"time"
 
-	"github.com/PaddlePaddle/Paddle/go/pserver/internal/connection"
+	"github.com/PaddlePaddle/Paddle/go/connection"
+	log "github.com/sirupsen/logrus"
 )
 
 // TODO(helin): add RPC call retry logic
@@ -47,7 +48,7 @@ func NewClient(l Lister, pserverNum int, sel Selector) *Client {
 // monitorPservers monitors pserver addresses, and updates connection
 // when the address changes.
 func (c *Client) monitorPservers(l Lister, pserverNum int) {
-	knownServers := make([]Server, pserverNum)
+	lastServers := make([]Server, pserverNum)
 	ticker := time.NewTicker(10 * time.Second)
 	monitor := func() {
 		curServers := make([]Server, pserverNum)
@@ -56,25 +57,37 @@ func (c *Client) monitorPservers(l Lister, pserverNum int) {
 			curServers[l.Index] = l
 		}
 
-		for i := range knownServers {
-			if knownServers[i].Addr != curServers[i].Addr {
-				err := c.pservers[i].Connect(curServers[i].Addr)
-				if err != nil {
-					log.Println(err)
-
-					// connect to addr failed, set
-					// to last known addr in order
-					// to retry next time.
-					curServers[i].Addr = knownServers[i].Addr
-				}
+		for i := range lastServers {
+			if lastServers[i].Addr == curServers[i].Addr {
+				continue
 			}
+
+			if curServers[i].Addr == "" {
+				err := c.pservers[i].Close()
+				if err != nil {
+					log.Errorln(err)
+				}
+
+				continue
+			}
+
+			err := c.pservers[i].Connect(curServers[i].Addr)
+			if err != nil {
+				log.Errorln(err)
+
+				// connect to addr failed, set
+				// to last known addr in order
+				// to retry next time.
+				curServers[i].Addr = lastServers[i].Addr
+			}
+
 		}
 
-		knownServers = curServers
+		lastServers = curServers
 	}
 
 	monitor()
-	for _ = range ticker.C {
+	for range ticker.C {
 		monitor()
 	}
 }
@@ -93,16 +106,14 @@ func (c *Client) BeginInitParams() bool {
 
 // InitParam initializes the parameter on parameter servers.
 func (c *Client) InitParam(paramWithConfigs ParameterWithConfig) error {
-	var dummy int
-	return c.pservers[c.partition(paramWithConfigs.Param.Name)].Call("Service.InitParam", paramWithConfigs, &dummy)
+	return c.pservers[c.partition(paramWithConfigs.Param.Name)].Call("Service.InitParam", paramWithConfigs, nil)
 }
 
 // FinishInitParams tells parameter servers client has sent all
 // parameters to parameter servers as initialization.
 func (c *Client) FinishInitParams() error {
 	for _, p := range c.pservers {
-		var dummy int
-		err := p.Call("Service.FinishInitParams", dummy, &dummy)
+		err := p.Call("Service.FinishInitParams", 0, nil)
 		if err != nil {
 			return err
 		}
@@ -113,11 +124,13 @@ func (c *Client) FinishInitParams() error {
 // SendGrads sends gradients to parameter servers for updating
 // parameters.
 func (c *Client) SendGrads(grads []Gradient) error {
+	if len(grads) == 0 {
+		return errors.New("no gradient received")
+	}
 	errCh := make(chan error, len(grads))
 	for _, g := range grads {
 		go func(g Gradient) {
-			var dummy int
-			err := c.pservers[c.partition(g.Name)].Call("Service.SendGrad", g, &dummy)
+			err := c.pservers[c.partition(g.Name)].Call("Service.SendGrad", g, nil)
 			errCh <- err
 		}(g)
 	}
@@ -196,8 +209,7 @@ func (c *Client) Save(path string) error {
 	errCh := make(chan error, len(c.pservers))
 
 	for _, p := range c.pservers {
-		var dummy int
-		err := p.Call("Service.Save", path, &dummy)
+		err := p.Call("Service.Save", path, nil)
 		errCh <- err
 	}
 

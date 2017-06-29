@@ -9,8 +9,10 @@ import (
 // ElementType is the type of elements of a Parameter.
 type ElementType int
 
-var ErrAlreadyInitialized = errors.New("pserver already initialized")
-var ErrUninitialized = errors.New("pserver not fully initialized")
+const (
+	AlreadyInitialized = "pserver already initialized"
+	Uninitialized      = "pserver not fully initialized"
+)
 
 // Supported element types
 const (
@@ -21,6 +23,9 @@ const (
 	Float32
 	Float64
 )
+
+// PsDesired is etcd path for store desired pserver count
+const PsDesired = "/ps_desired"
 
 // Parameter is a piece of data to sync with the parameter server.
 type Parameter struct {
@@ -41,25 +46,30 @@ type Gradient Parameter
 // Service is the RPC service for pserver.
 type Service struct {
 	initialized chan struct{}
+	idx         int
 
 	mu       sync.Mutex
 	opt      *optimizer
 	paramMap map[string]Parameter
 }
 
-// NewService creates a new service.
-func NewService() *Service {
-	s := &Service{opt: newOptimizer(sgd, 0.01)}
+// NewService creates a new service, will bypass etcd registration if no
+// endpoints specified.
+func NewService(idx int) (*Service, error) {
+	s := &Service{
+		idx: idx,
+		opt: newOptimizer(sgd, 0.005),
+	}
 	s.paramMap = make(map[string]Parameter)
 	s.initialized = make(chan struct{})
-	return s
+	return s, nil
 }
 
 // InitParam initializes a parameter.
 func (s *Service) InitParam(paramWithConfigs ParameterWithConfig, dummy *int) error {
 	select {
 	case <-s.initialized:
-		return ErrAlreadyInitialized
+		return errors.New(AlreadyInitialized)
 	default:
 	}
 
@@ -80,7 +90,7 @@ func (s *Service) InitParam(paramWithConfigs ParameterWithConfig, dummy *int) er
 func (s *Service) FinishInitParams(dummy0 int, dummy1 *int) error {
 	select {
 	case <-s.initialized:
-		return ErrAlreadyInitialized
+		return errors.New(AlreadyInitialized)
 	default:
 	}
 
@@ -94,7 +104,7 @@ func (s *Service) SendGrad(g Gradient, dummy *int) error {
 	select {
 	case <-s.initialized:
 	default:
-		return ErrUninitialized
+		return errors.New(Uninitialized)
 	}
 
 	s.mu.Lock()

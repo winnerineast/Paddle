@@ -25,12 +25,13 @@ COPY ./paddle/scripts/docker/root/ /root/
 RUN apt-get update && \
     apt-get install -y \
     git python-pip python-dev openssh-server bison  \
-    wget unzip tar xz-utils bzip2 gzip coreutils  \
+    wget unzip tar xz-utils bzip2 gzip coreutils ntp \
     curl sed grep graphviz libjpeg-dev zlib1g-dev  \
     python-numpy python-matplotlib gcc g++ \
     automake locales clang-format-3.8 swig doxygen cmake  \
     liblapack-dev liblapacke-dev libboost-dev \
-    clang-3.8 llvm-3.8 libclang-3.8-dev && \
+    clang-3.8 llvm-3.8 libclang-3.8-dev \
+    net-tools && \
     apt-get clean -y
 
 # Install Go

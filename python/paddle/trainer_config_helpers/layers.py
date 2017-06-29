@@ -31,31 +31,31 @@ except ImportError:
 import copy
 
 __all__ = [
-    "full_matrix_projection",
-    "AggregateLevel",
-    "ExpandLevel",
-    "identity_projection",
-    "dotmul_projection",
-    "dotmul_operator",
-    "repeat_layer",
-    "seq_reshape_layer",
-    "table_projection",
-    "mixed_layer",
-    "data_layer",
-    "embedding_layer",
-    "fc_layer",
-    "grumemory",
-    "pooling_layer",
-    "lstmemory",
-    "last_seq",
-    "first_seq",
-    "cos_sim",
-    "hsigmoid",
-    "conv_projection",
-    "mse_cost",
-    "regression_cost",
+    'full_matrix_projection',
+    'AggregateLevel',
+    'ExpandLevel',
+    'identity_projection',
+    'dotmul_projection',
+    'dotmul_operator',
+    'repeat_layer',
+    'seq_reshape_layer',
+    'table_projection',
+    'mixed_layer',
+    'data_layer',
+    'embedding_layer',
+    'fc_layer',
+    'grumemory',
+    'pooling_layer',
+    'lstmemory',
+    'last_seq',
+    'first_seq',
+    'cos_sim',
+    'hsigmoid',
+    'conv_projection',
+    'mse_cost',
+    'regression_cost',
     'classification_cost',
-    "LayerOutput",
+    'LayerOutput',
     'img_conv_layer',
     'img_pool_layer',
     'batch_norm_layer',
@@ -111,6 +111,7 @@ __all__ = [
     'block_expand_layer',
     'maxout_layer',
     'out_prod_layer',
+    'printer_layer',
     'print_layer',
     'priorbox_layer',
     'cross_channel_norm_layer',
@@ -120,6 +121,9 @@ __all__ = [
     'smooth_l1_cost',
     'layer_support',
     'multiplex_layer',
+    'row_conv_layer',
+    'dropout_layer',
+    'prelu_layer',
 ]
 
 
@@ -128,26 +132,26 @@ class LayerType(object):
     Layer type enumerations.
     """
 
-    DATA = "data"
-    MIXED_LAYER = "mixed"
-    LSTMEMORY = "lstmemory"
-    GRUMEMORY = "gated_recurrent"
-    SEQUENCE_LAST_INSTANCE = "seqlastins"
-    SEQUENCE_FIRST_INSTANCE = "seqfirstins"
-    SEQUENCE_RESHAPE = "seqreshape"
-    POOLING_MAX = "max"
+    DATA = 'data'
+    MIXED_LAYER = 'mixed'
+    LSTMEMORY = 'lstmemory'
+    GRUMEMORY = 'gated_recurrent'
+    SEQUENCE_LAST_INSTANCE = 'seqlastins'
+    SEQUENCE_FIRST_INSTANCE = 'seqfirstins'
+    SEQUENCE_RESHAPE = 'seqreshape'
+    POOLING_MAX = 'max'
     POOLING_AVG = 'average'
-    FC_LAYER = "fc"
+    FC_LAYER = 'fc'
     COST = 'cost'
     COSINE_SIM_VEC = 'cos_vm'
     COSINE_SIM = 'cos'
     HSIGMOID = 'hsigmoid'
-    CONV_LAYER = "conv"
-    CONVTRANS_LAYER = "convt"
-    EXCONV_LAYER = "exconv"
-    EXCONVTRANS_LAYER = "exconvt"
-    CUDNNCONV_LAYER = "cudnn_conv"
-    POOL_LAYER = "pool"
+    CONV_LAYER = 'conv'
+    CONVTRANS_LAYER = 'convt'
+    EXCONV_LAYER = 'exconv'
+    EXCONVTRANS_LAYER = 'exconvt'
+    CUDNNCONV_LAYER = 'cudnn_conv'
+    POOL_LAYER = 'pool'
     BATCH_NORM_LAYER = 'batch_norm'
     NORM_LAYER = 'norm'
     SUM_TO_ONE_NORM_LAYER = 'sum_to_one_norm'
@@ -187,25 +191,28 @@ class LayerType(object):
     SPP_LAYER = "spp"
     PAD_LAYER = "pad"
     MULTIPLEX_LAYER = "multiplex"
+    ROW_CONV_LAYER = "row_conv"
 
-    PRINT_LAYER = "print"
-    PRIORBOX_LAYER = "priorbox"
+    PRINT_LAYER = 'print'
+    PRIORBOX_LAYER = 'priorbox'
 
-    CTC_LAYER = "ctc"
-    WARP_CTC_LAYER = "warp_ctc"
-    CRF_LAYER = "crf"
-    CRF_DECODING_LAYER = "crf_decoding"
+    CTC_LAYER = 'ctc'
+    WARP_CTC_LAYER = 'warp_ctc'
+    CRF_LAYER = 'crf'
+    CRF_DECODING_LAYER = 'crf_decoding'
     NCE_LAYER = 'nce'
 
-    RANK_COST = "rank-cost"
-    LAMBDA_COST = "lambda_cost"
-    HUBER = "huber"
-    CROSS_ENTROPY = "multi-class-cross-entropy"
-    CROSS_ENTROPY_WITH_SELFNORM = "multi_class_cross_entropy_with_selfnorm"
-    SOFT_BIN_CLASS_CROSS_ENTROPY = "soft_binary_class_cross_entropy"
-    MULTI_BIN_LABEL_CROSS_ENTROPY = "multi_binary_label_cross_entropy"
-    SUM_COST = "sum_cost"
-    SMOOTH_L1 = "smooth_l1"
+    RANK_COST = 'rank-cost'
+    LAMBDA_COST = 'lambda_cost'
+    HUBER = 'huber'
+    CROSS_ENTROPY = 'multi-class-cross-entropy'
+    CROSS_ENTROPY_WITH_SELFNORM = 'multi_class_cross_entropy_with_selfnorm'
+    SOFT_BIN_CLASS_CROSS_ENTROPY = 'soft_binary_class_cross_entropy'
+    MULTI_BIN_LABEL_CROSS_ENTROPY = 'multi_binary_label_cross_entropy'
+    SUM_COST = 'sum_cost'
+    SMOOTH_L1 = 'smooth_l1'
+
+    PRELU = 'prelu'
 
     @staticmethod
     def is_layer_type(type_name):
@@ -303,18 +310,6 @@ class LayerOutput(object):
             outputs = ['default']
         self.outputs = outputs
         self.reverse = reverse
-
-    def __repr__(self):
-        """
-        Disable __repr__ for debug reason. Will be implemented when release
-        """
-        assert False, "this method should not be invoked"
-
-    def __str__(self):
-        """
-        Disable __str__ for debug reason. Will be implemented when release
-        """
-        assert False, "this method should not be invoked"
 
     def set_input(self, input):
         """
@@ -969,7 +964,7 @@ def fc_layer(input,
 
 
 @wrap_name_default("print")
-def print_layer(input, name=None):
+def printer_layer(input, format=None, name=None):
     """
     Print the output value of input layers. This layer is useful for debugging.
 
@@ -987,9 +982,17 @@ def print_layer(input, name=None):
 
     Layer(
         name=name,
+        format=format,
         type=LayerType.PRINT_LAYER,
         inputs=[l.name for l in input], )
     # this layer don't return anything, can not be input of other layer.
+
+# Keep print_layer for compatibility with V1 API.
+# 'print_layer' does not work for V2 API because it will be changed to
+# 'print' for V2 API. But 'print' is a reserved key word in python.
+
+
+print_layer = printer_layer
 
 
 @wrap_name_default("priorbox")
@@ -1551,14 +1554,24 @@ def expand_layer(input,
 
 
 @wrap_name_default()
+@wrap_act_default(act=IdentityActivation())
 @layer_support()
-def repeat_layer(input, num_repeats, name=None, layer_attr=None):
+def repeat_layer(input,
+                 num_repeats,
+                 as_row_vector=True,
+                 act=None,
+                 name=None,
+                 layer_attr=None):
     """
-    A layer for repeating the input for num_repeats times. This is equivalent
-    to apply concat_layer() with num_repeats same input.
+    A layer for repeating the input for num_repeats times.
 
+    If as_row_vector:
     .. math::
-       y  = [x, x, \cdots, x]
+       y  = [x_1,\cdots, x_n, \cdots, x_1, \cdots, x_n]
+    If not as_row_vector:
+    .. math::
+       y  = [x_1,\cdots, x_1, \cdots, x_n, \cdots, x_n]
+
 
     The example usage is:
 
@@ -1571,6 +1584,14 @@ def repeat_layer(input, num_repeats, name=None, layer_attr=None):
     :param num_repeats: Repeat the input so many times
     :type num_repeats: int
     :param name: Layer name.
+    :param as_row_vector: True for treating input as row vector and repeating
+                          in the column direction.  This is equivalent to apply
+                          concat_layer() with num_repeats same input.
+                          False for treating input as column vector and repeating
+                          in the row direction.
+    :type as_row_vector: bool
+    :param act: Activation type.
+    :type act: BaseActivation
     :type name: basestring
     :param layer_attr: extra layer attributes.
     :type layer_attr: ExtraLayerAttribute.
@@ -1581,13 +1602,16 @@ def repeat_layer(input, num_repeats, name=None, layer_attr=None):
     l = Layer(
         inputs=[input.name],
         name=name,
+        active_type=act.name,
         num_filters=num_repeats,
+        as_row_vector=as_row_vector,
         type=LayerType.FEATURE_MAP_EXPAND_LAYER,
         **ExtraAttr.to_kwargs(layer_attr))
     return LayerOutput(
         name=name,
         size=l.config.size,
         layer_type=LayerType.FEATURE_MAP_EXPAND_LAYER,
+        activation=act,
         parents=[input])
 
 
@@ -2832,11 +2856,13 @@ def seq_concat_layer(a, b, act=None, name=None, layer_attr=None,
     Concat sequence a with sequence b.
 
     Inputs:
-      - a = [a1, a2, ..., an]
+      - a = [a1, a2, ..., am]
       - b = [b1, b2, ..., bn]
-      - Note that the length of a and b should be the same.
 
-    Output: [a1, b1, a2, b2, ..., an, bn]
+    Output: [a1, ..., am, b1, ..., bn]
+
+    Note that the above computation is for one sample. Multiple samples are
+    processed in one batch.
 
     The example usage is:
 
@@ -2916,10 +2942,10 @@ def memory(name,
     to specify the layer needs to be remembered as the following:
 
     .. code-block:: python
+
        mem = memory(size=256)
        state = fc_layer(input=mem, size=256)
        mem.set_input(mem)
-
 
     :param name: the name of the layer which this memory remembers.
                  If name is None, user should call set_input() to specify the
@@ -2930,7 +2956,7 @@ def memory(name,
     :param memory_name: the name of the memory.
                         It is ignored when name is provided.
     :type memory_name: basestring
-    :param is_seq: is sequence for boot_layer
+    :param is_seq: DEPRECATED. is sequence for boot_layer
     :type is_seq: bool
     :param boot_layer: boot layer of memory.
     :type boot_layer: LayerOutput|None
@@ -2957,7 +2983,6 @@ def memory(name,
     memory_name = Memory(
         name,
         size,
-        is_sequence=is_seq,
         boot_layer=boot_layer.name if boot_layer is not None else None,
         boot_bias=boot_bias,
         boot_bias_active_type=boot_bias_active_type.name,
@@ -3304,19 +3329,21 @@ class StaticInput(object):
     """
     StaticInput is only used in recurrent_group which defines a read-only memory
     that can be a sequence or non-sequence.
+    :param size: DEPRECATED
+    :param is_seq: DEPRECATED
     """
 
     def __init__(self, input, is_seq=False, size=None):
         assert isinstance(input, LayerOutput)
         self.input = input
-        self.is_seq = is_seq
-        assert input.size is not None or size is not None
+        assert input.size is not None
         if size is not None:
-            input.size = size
+            assert input.size == size
 
 
-class SubsequenceInput(object):
+def SubsequenceInput(input):
     """
+    DEPRECATED.
     Input sequence has sub-sequence, used in recurrent_group.
 
     The example usage is:
@@ -3325,11 +3352,7 @@ class SubsequenceInput(object):
 
        input = SubsequenceInput(layer)
     """
-
-    def __init__(self, input):
-        assert isinstance(input, LayerOutput)
-        assert input.size is not None
-        self.input = input
+    return input
 
 
 @wrap_name_default("recurrent_group")
@@ -3393,7 +3416,8 @@ def recurrent_group(step,
                     input sequence in a reverse order.
     :type reverse: bool
 
-    :param targetInlink: the input layer which share info with layer group's output
+    :param targetInlink: DEPRECATED.
+                         The input layer which share info with layer group's output
 
                          Param input specifies multiple input layers. For
                          SubsequenceInput inputs, config should assign one input
@@ -3407,7 +3431,7 @@ def recurrent_group(step,
                           else, for training or testing, one of the input type must
                           be LayerOutput.
 
-    : type is_generating: bool
+    :type is_generating: bool
 
     :return: LayerOutput object.
     :rtype: LayerOutput
@@ -3415,46 +3439,21 @@ def recurrent_group(step,
     model_type('recurrent_nn')
 
     def is_single_input(x):
-        return isinstance(x, LayerOutput) or isinstance(x, StaticInput) \
-               or isinstance(x, SubsequenceInput)
+        return isinstance(x, LayerOutput) or isinstance(x, StaticInput)
 
     if is_single_input(input):
         input = [input]
     assert isinstance(input, collections.Sequence)
 
     def is_in_links(x):
-        return isinstance(x, LayerOutput) or isinstance(x, SubsequenceInput)
+        return isinstance(x, LayerOutput)
 
     in_links = filter(is_in_links, input)
 
-    def targetInlink_in_inlinks():
-        for inlink in in_links:
-            if isinstance(inlink, SubsequenceInput):
-                if targetInlink == inlink.input:
-                    return True
-            elif targetInlink == inlink:
-                return True
-        return False
-
-    assert (targetInlink == None or targetInlink_in_inlinks())
-    targetInlinkName = None if targetInlink == None \
-        else targetInlink.name if isinstance(targetInlink, LayerOutput) \
-        else targetInlink.input.name
-
-    contains_sub_seq = [False]
-
-    def map_in_links(x):
-        if isinstance(x, SubsequenceInput):
-            contains_sub_seq[0] = True
-            return Link(name=x.input.name, has_subseq=True)
-        else:
-            return x.name
-
     RecurrentLayerGroupWithoutOutLinksBegin(
         name=name,
-        in_links=map(map_in_links, in_links),
-        seq_reversed=reverse,
-        target_inlinkname=targetInlinkName)
+        in_links=map(lambda x: x.name, in_links),
+        seq_reversed=reverse)
     in_args = []
     has_LayerOutput = False
     for each_input in input:
@@ -3462,21 +3461,13 @@ def recurrent_group(step,
         if isinstance(each_input, LayerOutput):
             in_args.append(each_input)
             has_LayerOutput = True
-        elif isinstance(each_input, SubsequenceInput):
-            in_args.append(each_input.input)
-            has_LayerOutput = True
-        else:
+        else:  # StaticInput
             mem_name = "__%s_memory__" % each_input.input.name
             mem = memory(
-                name=mem_name,
-                is_seq=each_input.is_seq,
+                name=None,
                 size=each_input.input.size,
                 boot_layer=each_input.input)
-            with mixed_layer(
-                    name=mem_name,
-                    size=each_input.input.size,
-                    act=IdentityActivation()) as mix:
-                mix += identity_projection(mem)
+            mem.set_input(mem)
             in_args.append(mem)
 
     assert (is_generating != has_LayerOutput)
@@ -3489,10 +3480,7 @@ def recurrent_group(step,
     for ot in layer_outs:
         assert isinstance(ot, LayerOutput)
         ot.reverse = reverse
-        if contains_sub_seq[0]:
-            RecurrentLayerGroupSetOutLink(Link(ot.name, has_subseq=True))
-        else:
-            RecurrentLayerGroupSetOutLink(ot.name)
+        RecurrentLayerGroupSetOutLink(ot.name)
 
     RecurrentLayerGroupEnd(name=name)
 
@@ -3760,7 +3748,6 @@ def beam_search(step,
     assert generated_input_index != -1
 
     gipt = input[generated_input_index]
-    assert isinstance(gipt, BaseGeneratedInput)
 
     gipt.bos_id = bos_id
     gipt.eos_id = eos_id
@@ -3780,7 +3767,6 @@ def beam_search(step,
         predict = gipt.after_real_step(step(*args))
 
         eos_layer(input=predict, eos_id=eos_id, name=eos_name)
-
         return predict
 
     tmp = recurrent_group(
@@ -3814,7 +3800,7 @@ def mse_cost(input, label, weight=None, name=None, coeff=1.0, layer_attr=None):
 
     ..  math::
 
-        \frac{1}{N}\sum_{i=1}^N(t_i-y_i)^2
+        \\frac{1}{N}\sum_{i=1}^N(t_i-y_i)^2
 
     :param name: layer name.
     :type name: basestring
@@ -3852,9 +3838,9 @@ def classification_cost(input,
                         label,
                         weight=None,
                         name=None,
-                        top_k=None,
                         evaluator=classification_error_evaluator,
-                        layer_attr=None):
+                        layer_attr=None,
+                        coeff=1.):
     """
     classification cost Layer.
 
@@ -3867,11 +3853,11 @@ def classification_cost(input,
     :param weight: The weight affects the cost, namely the scale of cost.
                    It is an optional argument.
     :type weight: LayerOutput
-    :param top_k: number k in top-k error rate
-    :type top_k: int
     :param evaluator: Evaluator method.
     :param layer_attr: layer's extra attribute.
     :type layer_attr: ExtraLayerAttribute
+    :param coeff: The coefficient affects the gradient in the backward.
+    :type coeff: float
     :return: LayerOutput object.
     :rtype: LayerOutput
     """
@@ -3885,6 +3871,7 @@ def classification_cost(input,
         name=name,
         type="multi-class-cross-entropy",
         inputs=ipts,
+        coeff=coeff,
         **ExtraLayerAttribute.to_kwargs(layer_attr))
 
     def __add_evaluator__(e):
@@ -3896,7 +3883,7 @@ def classification_cost(input,
         assert isinstance(e.for_classification, bool)
         assert e.for_classification
 
-        e(name=e.__name__, input=input, label=label, weight=weight, top_k=top_k)
+        e(name=e.__name__, input=input, label=label, weight=weight)
 
     if not isinstance(evaluator, collections.Sequence):
         evaluator = [evaluator]
@@ -4717,7 +4704,7 @@ def ctc_layer(input,
         fc_layer with softmax activation, should be num_classes + 1. The size of ctc_layer
         should also be num_classes + 1.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -4769,27 +4756,42 @@ def warp_ctc_layer(input,
                    layer_attr=None):
     """
     A layer intergrating the open-source `warp-ctc
-    <https://github.com/baidu-research/warp-ctc>` library, which is used in
+    <https://github.com/baidu-research/warp-ctc>`_ library, which is used in
     `Deep Speech 2: End-toEnd Speech Recognition in English and Mandarin
-    <https://arxiv.org/pdf/1512.02595v1.pdf>`, to compute Connectionist Temporal
-    Classification (CTC) loss.
+    <https://arxiv.org/pdf/1512.02595v1.pdf>`_, to compute Connectionist Temporal
+    Classification (CTC) loss. Besides, another `warp-ctc
+    <https://github.com/gangliao/warp-ctc>`_ repository, which is forked from
+    the official one, is maintained to enable more compiling options. During the
+    building process, PaddlePaddle will clone the source codes, build and
+    install it to :code:`third_party/install/warpctc` directory.
+
+    To use warp_ctc layer, you need to specify the path of :code:`libwarpctc.so`,
+    using following methods:
+
+    1. Set it in :code:`paddle.init` (python api) or :code:`paddle_init` (c api),
+    such as :code:`paddle.init(use_gpu=True,
+    warpctc_dir=your_paddle_source_dir/third_party/install/warpctc/lib)`.
+
+    2. Set environment variable LD_LIBRARY_PATH on Linux or DYLD_LIBRARY_PATH
+    on Mac OS. For instance, :code:`export
+    LD_LIBRARY_PATH=your_paddle_source_dir/third_party/install/warpctc/lib:$LD_LIBRARY_PATH`.
 
     More details of CTC can be found by referring to `Connectionist Temporal
     Classification: Labelling Unsegmented Sequence Data with Recurrent
     Neural Networks <http://machinelearning.wustl.edu/mlpapers/paper_files/
-    icml2006_GravesFGS06.pdf>`_
+    icml2006_GravesFGS06.pdf>`_.
 
     Note:
         - Let num_classes represent the category number. Considering the 'blank'
-          label needed by CTC, you need to use (num_classes + 1) as the input
-          size. Thus, the size of both warp_ctc_layer and 'input' layer should
-          be set to num_classes + 1.
+          label needed by CTC, you need to use (num_classes + 1) as the input size.
+          Thus, the size of both warp_ctc layer and 'input' layer should be set to
+          num_classes + 1.
         - You can set 'blank' to any value ranged in [0, num_classes], which
           should be consistent as that used in your labels.
         - As a native 'softmax' activation is interated to the warp-ctc library,
           'linear' activation is expected instead in the 'input' layer.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -4850,7 +4852,7 @@ def crf_layer(input,
     A layer for calculating the cost of sequential conditional random
     field model.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -4924,7 +4926,7 @@ def crf_decoding_layer(input,
     this layer will also calculate error. output.value[i] is 1 for incorrect
     decoding or 0 for correct decoding.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -5117,7 +5119,7 @@ def rank_cost(left,
       - :math:`o_i` and :math:`o_j`: the left output and right output.
         Their dimension is one.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -5174,7 +5176,7 @@ def lambda_cost(input,
     """
     lambdaCost for lambdaRank LTR approach.
 
-    The simple usage:
+    The example usage is:
 
     .. code-block:: python
 
@@ -5232,6 +5234,8 @@ def cross_entropy(input,
     """
     A loss layer for multi class entropy.
 
+    The example usage is:
+
     .. code-block:: python
 
        cost = cross_entropy(input=input_layer,
@@ -5278,6 +5282,8 @@ def cross_entropy_with_selfnorm(input,
     A loss layer for multi class entropy with selfnorm.
     Input should be a vector of positive numbers, without normalization.
 
+    The example usage is:
+
     .. code-block:: python
 
        cost = cross_entropy_with_selfnorm(input=input_layer,
@@ -5319,6 +5325,8 @@ def sum_cost(input, name=None, layer_attr=None):
     """
     A loss layer which calculate the sum of the input as loss
 
+    The example usage is:
+
     .. code-block:: python
 
        cost = sum_cost(input=input_layer)
@@ -5347,6 +5355,8 @@ def sum_cost(input, name=None, layer_attr=None):
 def huber_cost(input, label, name=None, coeff=1.0, layer_attr=None):
     """
     A loss layer for huber loss.
+
+    The example usage is:
 
     .. code-block:: python
 
@@ -5387,6 +5397,8 @@ def multi_binary_label_cross_entropy(input,
                                      layer_attr=None):
     """
     A loss layer for multi binary label cross entropy.
+
+    The example usage is:
 
     .. code-block:: python
 
@@ -5447,6 +5459,8 @@ def smooth_l1_cost(input, label, name=None, coeff=1.0, layer_attr=None):
     More details can be found by referring to `Fast R-CNN
     <https://arxiv.org/pdf/1504.08083v2.pdf>`_
 
+    The example usage is:
+
     .. code-block:: python
 
        cost = smooth_l1_cost(input=input_layer,
@@ -5496,6 +5510,8 @@ def multiplex_layer(input, name=None, layer_attr=None):
     where, y is output. :math:`x_{k}` is the k-th input layer and
     :math:`k = x_{0}[i] + 1`.
 
+    The example usage is:
+
     .. code-block:: python
 
        maxid = multiplex_layer(input=layers)
@@ -5526,5 +5542,157 @@ def multiplex_layer(input, name=None, layer_attr=None):
     return LayerOutput(
         name=name,
         layer_type=LayerType.MULTIPLEX_LAYER,
+        parents=input,
+        size=l.config.size)
+
+
+@wrap_name_default("dropout")
+def dropout_layer(input, dropout_rate, name=None):
+    """
+    @TODO(yuyang18): Add comments.
+
+    :param name:
+    :param input:
+    :param dropout_rate:
+    :return:
+    """
+    return addto_layer(
+        name=name,
+        input=input,
+        act=LinearActivation(),
+        bias_attr=False,
+        layer_attr=ExtraAttr(drop_rate=dropout_rate))
+
+
+@wrap_name_default()
+@wrap_act_default(act=LinearActivation())
+@wrap_param_attr_default()
+@layer_support(DROPOUT)
+def row_conv_layer(input,
+                   context_len,
+                   act=None,
+                   name=None,
+                   param_attr=None,
+                   layer_attr=None):
+    """
+
+    The row convolution is called lookahead convolution. It is firstly
+    introduced in paper of `Deep Speech 2: End-toEnd Speech Recognition
+    in English and Mandarin <https://arxiv.org/pdf/1512.02595v1.pdf>`_ .
+
+    The bidirectional RNN that learns representation for a sequence by
+    performing a forward and a backward pass through the entire sequence.
+    However, unlike unidirectional RNNs, bidirectional RNNs are challenging
+    to deploy in an online and low-latency setting. The lookahead convolution
+    incorporates information from future subsequences in a computationally
+    efficient manner to improve unidirectional recurrent neural networks.
+
+    The connection of row convolution is different form the 1D sequence
+    convolution. Assumed that, the future context-length is k, that is to say,
+    it can get the output at timestep t by using the the input feature from t-th
+    timestep to (t+k+1)-th timestep. Assumed that the hidden dim of input
+    activations are d, the activations r_t for the new layer at time-step t are:
+
+    .. math::
+
+        r_{t,r} = \sum_{j=1}^{k + 1} {w_{i,j}h_{t+j-1, i}}
+                  \quad \text{for} \quad  (1 \leq i \leq d)
+
+    Note:
+        The `context_len` is `k + 1`. That is to say, the lookahead step
+        number plus one equals context_len.
+
+
+    .. code-block:: python
+
+       row_conv = row_conv_layer(input=input_layer, context_len=3)
+
+
+    :param input: The input layer.
+    :type input: LayerOutput
+    :param context_len: The context length equals the lookahead step number
+                        plus one.
+    :type context_len: int
+    :param act: Activation Type. Default is linear activation.
+    :type act: BaseActivation
+    :param param_attr: The Parameter Attribute. If None, the parameter will be
+                       initialized smartly. It's better set it by yourself.
+    :type param_attr: ParameterAttribute
+    :param layer_attr: Extra Layer config.
+    :type layer_attr: ExtraLayerAttribute|None
+    :return: LayerOutput object.
+    :rtype: LayerOutput
+
+    """
+    assert isinstance(input, LayerOutput)
+    assert context_len > 0, "the context_len must be greatet than 0."
+
+    Layer(
+        inputs=[Input(input.name, **param_attr.attr)],
+        name=name,
+        context_length=context_len,
+        type=LayerType.ROW_CONV_LAYER,
+        active_type=act.name,
+        **ExtraLayerAttribute.to_kwargs(layer_attr))
+    return LayerOutput(
+        name, LayerType.ROW_CONV_LAYER, input, activation=act, size=input.size)
+
+
+@layer_support()
+@wrap_name_default()
+@wrap_param_attr_default()
+def prelu_layer(input,
+                name=None,
+                partial_sum=1,
+                param_attr=None,
+                layer_attr=None):
+    """
+    The Parameter Relu activation that actives outputs with a learnable weight.
+
+    Reference:
+        Delving Deep into Rectifiers: Surpassing Human-Level Performance on
+        ImageNet Classification http://arxiv.org/pdf/1502.01852v1.pdf
+
+    .. math::
+       z_i &\\quad if \\quad z_i > 0 \\\\
+       a_i * z_i  &\\quad \\mathrm{otherwise}
+
+    The example usage is:
+
+    .. code-block:: python
+
+       prelu = prelu_layer(input=layers, partial_sum=1)
+
+    :param name: Name of this layer.
+    :type name: basestring
+    :param input: The input layer.
+    :type input: LayerOutput
+    :param partial_sum: this parameter makes a group of inputs share a same weight.
+
+        - partial_sum = 1, indicates the element-wise activation: each element has a weight.
+        - partial_sum = number of elements in one channel, indicates the channel-wise activation, elements in a channel share a same weight.
+        - partial_sum = number of outputs, indicates all elements share a same weight.
+
+    :type partial_sum: int
+    :param param_attr: The parameter attribute. See ParameterAttribute for details.
+    :type param_attr: ParameterAttribute|None
+    :param layer_attr: Extra layer configurations. Default is None.
+    :type layer_attr: ExtraLayerAttribute|None
+    :return: LayerOutput object.
+    :rtype: LayerOutput
+    """
+
+    assert isinstance(input, LayerOutput), 'prelu_layer only accepts one input'
+    assert isinstance(param_attr, ParameterAttribute)
+
+    l = Layer(
+        name=name,
+        type=LayerType.PRELU,
+        inputs=Input(input.name, **param_attr.attr),
+        partial_sum=partial_sum,
+        **ExtraLayerAttribute.to_kwargs(layer_attr))
+    return LayerOutput(
+        name=name,
+        layer_type=LayerType.PRELU,
         parents=input,
         size=l.config.size)

@@ -26,10 +26,10 @@ from paddle.trainer.config_parser import *
 
 __all__ = [
     'sequence_conv_pool', 'simple_lstm', "simple_img_conv_pool",
-    "img_conv_bn_pool", 'dropout_layer', 'lstmemory_group', 'lstmemory_unit',
-    'small_vgg', 'img_conv_group', 'vgg_16_network', 'gru_unit', 'gru_group',
-    'simple_gru', 'simple_attention', 'simple_gru2', 'bidirectional_gru',
-    'text_conv_pool', 'bidirectional_lstm', 'inputs', 'outputs'
+    "img_conv_bn_pool", 'lstmemory_group', 'lstmemory_unit', 'small_vgg',
+    'img_conv_group', 'vgg_16_network', 'gru_unit', 'gru_group', 'simple_gru',
+    'simple_attention', 'simple_gru2', 'bidirectional_gru', 'text_conv_pool',
+    'bidirectional_lstm', 'inputs', 'outputs'
 ]
 
 ######################################################
@@ -1366,29 +1366,6 @@ def simple_attention(encoded_sequence,
         input=scaled, pooling_type=SumPooling(), name="%s_pooling" % name)
 
 
-############################################################################
-#                         Miscs                                            #
-############################################################################
-
-
-@wrap_name_default("dropout")
-def dropout_layer(input, dropout_rate, name=None):
-    """
-    @TODO(yuyang18): Add comments.
-
-    :param name:
-    :param input:
-    :param dropout_rate:
-    :return:
-    """
-    return addto_layer(
-        name=name,
-        input=input,
-        act=LinearActivation(),
-        bias_attr=False,
-        layer_attr=ExtraAttr(drop_rate=dropout_rate))
-
-
 def inputs(layers, *args):
     """
     Declare the inputs of network. The order of input should be as same as
@@ -1404,7 +1381,7 @@ def inputs(layers, *args):
     if len(args) != 0:
         layers.extend(args)
 
-    Inputs(*[l.name for l in layers])
+    Inputs(* [l.name for l in layers])
 
 
 def outputs(layers, *args):
@@ -1447,7 +1424,7 @@ def outputs(layers, *args):
     assert len(layers) > 0
 
     if HasInputsSet():  # input already set
-        Outputs(*[l.name for l in layers])
+        Outputs(* [l.name for l in layers])
         return  # just return outputs.
 
     if len(layers) != 1:

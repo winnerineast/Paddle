@@ -1598,12 +1598,15 @@ TEST(Layer, FeatureMapExpandLayer) {
                               /* paraSize= */ 0});
   config.layerConfig.add_inputs();
   for (auto useGpu : {false, true}) {
-    testLayerGrad(config,
-                  "featmap_expand",
-                  /*batch_size*/ 100,
-                  /* trans= */ false,
-                  useGpu,
-                  /* useWeight */ true);
+    for (auto asRowVec : {false, true}) {
+      config.layerConfig.set_user_arg(asRowVec ? "as_row_vec" : "as_col_vec");
+      testLayerGrad(config,
+                    "featmap_expand",
+                    /*batch_size*/ 100,
+                    /* trans= */ false,
+                    useGpu,
+                    /* useWeight */ true);
+    }
   }
 }
 
@@ -1702,6 +1705,26 @@ TEST(Layer, TransLayer) {
 
   for (auto useGpu : {false, true}) {
     testLayerGrad(config, "trans", height, /* trans= */ false, useGpu);
+  }
+}
+
+TEST(Layer, RowConvLayer) {
+  const int context = 3;
+  const int size = 512;
+
+  TestConfig config;
+  config.layerConfig.set_type("row_conv");
+  config.layerConfig.set_size(size);
+  config.layerConfig.set_active_type("sigmoid");
+
+  config.inputDefs.push_back(
+      {INPUT_SEQUENCE_DATA, "layer_0", size, context * size});
+  LayerInputConfig* input = config.layerConfig.add_inputs();
+  RowConvConfig* conv = input->mutable_row_conv_conf();
+  conv->set_context_length(context);
+
+  for (auto useGpu : {false, true}) {
+    testLayerGrad(config, "row_conv", 100, false, useGpu, false);
   }
 }
 

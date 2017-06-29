@@ -30,9 +30,12 @@ func init() {
 		port[i] = p
 
 		go func(l net.Listener) {
-			s := pserver.NewService()
+			s, err := pserver.NewService(0)
+			if err != nil {
+				panic(err)
+			}
 			server := rpc.NewServer()
-			err := server.Register(s)
+			err = server.Register(s)
 			if err != nil {
 				panic(err)
 			}
@@ -117,7 +120,7 @@ func TestClientFull(t *testing.T) {
 
 	for i := range params {
 		if names[i] != params[i].Name {
-			t.Fatalf("order of returned parameter does not required: parameter name: %s, required name: %s", names[i], params[i])
+			t.Fatalf("order of returned parameter does not required: parameter name: %s, required name: %s", names[i], params[i].Name)
 		}
 	}
 }
